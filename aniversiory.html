@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Happy 1st Anniversary — Nidhi ❤️</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #ffe6eb, #fff9fb);
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+      opacity: 0;
+      animation: fadeIn 2.2s ease forwards;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .container { text-align: center; padding: 20px; max-width: 680px; z-index: 5; position: relative; }
+    h1 { font-family: 'Playfair Display', serif; color: #ff5e81; font-size: 2.2rem; animation: glow 2s ease-in-out infinite alternate; }
+    @keyframes glow { from { text-shadow: 0 0 8px #ff9bb0; } to { text-shadow: 0 0 20px #ff5e81, 0 0 30px #ffa6bf; } }
+
+    #speech { margin-top: 20px; font-size: 1.05rem; line-height: 1.6; color: #333; text-align: center; min-height: 210px; z-index:6; }
+    .end-message { opacity: 0; transition: opacity 2s ease; font-size: 1.35rem; color: #ff5e81; margin-top: 20px; font-weight: 600; }
+
+    /* Confetti canvas full-screen */
+    canvas#confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
+    /* Hearts layer on top */
+    .heart-layer { position: fixed; inset: 0; pointer-events: none; z-index: 4; overflow: visible; }
+
+    .heart { position: absolute; font-size: 26px; opacity: 0; transform: translateY(0) scale(0.8); filter: drop-shadow(0 6px 14px rgba(255,105,140,0.22)); }
+
+    /* slow float up animation for hearts */
+    @keyframes floatSlow {
+      0% { transform: translateY(0) scale(0.85); opacity: 0; }
+      10% { opacity: 0.9; }
+      100% { transform: translateY(-110vh) scale(1.15); opacity: 0; }
+    }
+
+    /* subtle vignette for focus */
+    .vignette { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(60% 60% at 50% 40%, rgba(255,255,255,0) 0%, rgba(0,0,0,0.06) 100%); z-index:2; }
+
+    /* responsive tweaks */
+    @media (max-width:520px){ h1{font-size:1.8rem} #speech{font-size:0.98rem} }
+  </style>
+</head>
+<body>
+  <div class="vignette"></div>
+  <canvas id="confetti"></canvas>
+  <div class="heart-layer" id="heartLayer"></div>
+
+  <div class="container" role="main" aria-live="polite">
+    <h1>Happy 1st Anniversary, Nidhi ❤️</h1>
+    <div id="speech"></div>
+    <div class="end-message" id="endMessage">Thank you, Nidhi ❤️ Forever &amp; Always</div>
+  </div>
+
+  <audio id="music" preload="auto">
+    <source src="https://cdn.pixabay.com/download/audio/2023/03/28/audio_c05f6b20e5.mp3?filename=romantic-piano-144257.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    // --- Confetti (gentle background) ---
+    const confettiCanvas = document.getElementById('confetti');
+    const ctx = confettiCanvas.getContext('2d');
+    let W, H, confetti = [];
+
+    function resize() { W = confettiCanvas.width = innerWidth; H = confettiCanvas.height = innerHeight; }
+    window.addEventListener('resize', resize); resize();
+
+    function rnd(min, max){ return Math.random()*(max-min)+min }
+    function createConfettiPiece(){
+      return { x: rnd(0,W), y: rnd(-H, H), r: rnd(2,6), c: `hsla(${rnd(330,360)},85%,68%,1)`, vx: rnd(-0.6,0.6), vy: rnd(0.6,2), a: rnd(0.5,1) };
+    }
+    for(let i=0;i<160;i++) confetti.push(createConfettiPiece());
+
+    function drawConfetti(){
+      ctx.clearRect(0,0,W,H);
+      confetti.forEach(p=>{
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle = p.c; ctx.globalAlpha = p.a; ctx.fill();
+        p.x += p.vx; p.y += p.vy; p.vy *= 1.0005;
+        if(p.y>H+10){ p.y = -10; p.x = rnd(0,W); p.vy = rnd(0.6,2); }
+      });
+      requestAnimationFrame(drawConfetti);
+    }
+    drawConfetti();
+
+    // --- Slow stepwise hearts ---
+    const heartLayer = document.getElementById('heartLayer');
+    const heartEmojis = ['💗','💖','💞','💓'];
+
+    function spawnHeart(delay, leftPercent){
+      setTimeout(()=>{
+        const el = document.createElement('div');
+        el.className = 'heart';
+        el.innerText = heartEmojis[Math.floor(Math.random()*heartEmojis.length)];
+        // position slightly off-screen bottom
+        const left = (leftPercent !== undefined) ? leftPercent : (Math.random()*80+8);
+        el.style.left = left + 'vw';
+        el.style.bottom = ( -10 - Math.random()*6 ) + 'vh';
+        el.style.opacity = 0;
+        el.style.fontSize = (18 + Math.random()*18) + 'px';
+        el.style.transform = 'translateY(0) scale(0.85)';
+        heartLayer.appendChild(el);
+
+        // trigger animation slowly
+        const duration = 18 + Math.random()*14; // long slow float (18-32s)
+        el.style.animation = `floatSlow ${duration}s linear forwards`;
+        el.style.opacity = 1;
+
+        // clean after done
+        setTimeout(()=>{ el.remove(); }, (duration*1000)+1200);
+      }, delay);
+    }
+
+    // Step-wise schedule over the whole minute: spawn a few hearts every 3-6s, slowly
+    const totalDuration = 60000; // 60 seconds
+    let t = 0;
+    while(t < totalDuration){
+      const stepDelay = Math.floor(rnd(3000,6000));
+      // spawn 1-3 hearts in each step, with slight offsets
+      const count = Math.random()>0.6?2:1;
+      for(let j=0;j<count;j++){
+        const offset = Math.floor(rnd(0,800));
+        const left = rnd(10,85);
+        spawnHeart(t+offset, left);
+      }
+      t += stepDelay;
+    }
+
+    // --- Typing speech and timed flow ---
+    const speechText = `This one year with you has been nothing short of a beautiful roller coaster ride — filled with laughter, surprises, and moments that stole my heart.\n\nThere were twists that made us dizzy, drops that made us hold tighter, and highs that made us forget the world. Through it all, one thing stayed constant — your hand in mine.\n\nYou taught me that love isn’t about perfection; it’s about showing up, even on the messy days. Every smile of yours turned my chaos into calm, every laugh reminded me how lucky I am.\n\nNidhi, you’ve painted my days with color and my nights with peace. This one year was magic — and if this is just the beginning, I can’t wait for forever.`;
+
+    const textContainer = document.getElementById('speech');
+    const endMessage = document.getElementById('endMessage');
+    let idx = 0;
+
+    // Calculate typing speed to roughly finish typing before 50s mark so end-message and fade-out occur
+    const targetTypingMs = 46000; // aim to finish typing in 46s
+    const charCount = speechText.length;
+    let baseDelay = Math.max(18, Math.floor(targetTypingMs/charCount)); // ms per char, not too fast
+
+    function typeStep(){
+      if(idx < speechText.length){
+        const ch = speechText[idx++];
+        if(ch === '\n') textContainer.innerHTML += '<br><br>';
+        else textContainer.innerHTML += ch;
+        // small random jitter so it feels human
+        const jitter = Math.random()*baseDelay*0.6 - baseDelay*0.3;
+        setTimeout(typeStep, Math.max(12, baseDelay + jitter));
+      } else {
+        // reveal end message after short pause
+        setTimeout(()=>{ endMessage.style.opacity = 1; }, 3500);
+      }
+    }
+
+    // --- Start music with gentle fade ---
+    const music = document.getElementById('music');
+    function fadeInMusic(){
+      music.volume = 0;
+      music.play().catch(()=>{});
+      const step = 0.02; const iv = setInterval(()=>{
+        music.volume = Math.min(0.85, music.volume + step);
+        if(music.volume >= 0.84) clearInterval(iv);
+      }, 300);
+    }
+
+    // Start everything together
+    window.addEventListener('load', ()=>{
+      // small delay so fade-in completes
+      setTimeout(()=>{
+        fadeInMusic();
+        typeStep();
+      }, 800);
+    });
+
+    // Auto end and gentle fade after 60s
+    setTimeout(()=>{
+      // gracefully stop music
+      const fadeOutStep = 0.04;
+      const fd = setInterval(()=>{
+        music.volume = Math.max(0, music.volume - fadeOutStep);
+        if(music.volume <= 0.02){ music.pause(); music.currentTime = 0; clearInterval(fd); }
+      }, 250);
+      // fade screen out
+      document.body.style.transition = 'opacity 2.5s ease';
+      document.body.style.opacity = 0;
+    }, 60000);
+  </script>
+</body>
+</html>
